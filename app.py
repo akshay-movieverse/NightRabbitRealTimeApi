@@ -110,5 +110,5 @@ def scrape():
 
 if __name__ == '__main__':
     #serve(app, host='192.168.1.47', port=5000, threads=4)
-    #app.run(debug=True)
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
+    #app.run(host='0.0.0.0', port=5000)
