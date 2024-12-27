@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Scraper</title>
+    <style>
+        /* Simple CSS for layout */
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 50%;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #player {
+            margin-top: 30px;
+            width: 80%;
+            max-width: 600px;
+            height: 400px;
+            background: #000;
+        }
+        select {
+            padding: 10px;
+            margin: 20px;
+        }
+    </style>
+
+    <!-- External Player Script -->
+    <script src="static/playerjs.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <h1>Scrape and Play Video</h1>
+    <form id="scrape-form">
+        <input type="text" id="url-input" placeholder="Enter URL to scrape" required>
+        <button type="submit">Scrape</button>
+    </form>
+
+    <div id="video-selection">
+        <!-- Dropdown to select video will appear here -->
+    </div>
+
+    <div id="player">
+        <!-- The player will be initialized here -->
+    </div>
+
+    <script>
+        document.getElementById('scrape-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            var url = document.getElementById('url-input').value;
+            
+            fetch('/scrape', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: url }) 
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    var videoData = data.video_data; // Expecting an array of video objects (link and resolution)
+                    var videoSelectionDiv = document.getElementById('video-selection');
+                    var selectElement = document.createElement('select');
+                    selectElement.id = 'video-dropdown';
+
+                    // Create options for the dropdown
+                    videoData.forEach(function(video, index) {
+                        var option = document.createElement('option');
+                        option.value = video.link;
+                        option.textContent = 'Resolution: ' + video.resolution + ' - Video ' + (index + 1);
+                        selectElement.appendChild(option);
+                    });
+
+                    // Append the dropdown to the page
+                    videoSelectionDiv.innerHTML = ''; // Clear previous content
+                    videoSelectionDiv.appendChild(selectElement);
+
+                    // Initialize player with the first video in the list
+                    loadPlayer(videoData[0].link);
+
+                    // Add event listener to update player when a new video is selected
+                    selectElement.addEventListener('change', function() {
+                        loadPlayer(selectElement.value);
+                    });
+
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+
+        // Function to load the player with a selected video link
+        function loadPlayer(videoLink) {
+            var playerDiv = document.getElementById('player');
+            playerDiv.innerHTML = ''; // Clear previous player
+
+            new Playerjs({
+                id: 'player',
+                file: videoLink
+            });
+        }
+    </script>
+
+</body>
+</html>
