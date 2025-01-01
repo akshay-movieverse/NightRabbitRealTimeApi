@@ -5,9 +5,9 @@ import requests
 from bs4 import BeautifulSoup
 import urllib
 from waitress import serve
-
+from flask_cors import CORS
 app = Flask(__name__)
-
+CORS(app)  # This will enable CORS for all routes
 
 def getQulaity(url):
     # Regular expression to match the multi parameter and its values
